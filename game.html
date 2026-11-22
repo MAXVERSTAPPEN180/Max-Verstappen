@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>F1 Reaction Time Test</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+            user-select: none; /* 防止狂点屏幕时选中文字 */
+        }
+        #game-box {
+            width: 90%;
+            max-width: 450px;
+            background: #222;
+            padding: 30px 20px;
+            border-radius: 12px;
+            border: 2px solid #444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .lights {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .light {
+            width: 38px;
+            height: 38px;
+            background-color: #440000;
+            border-radius: 50%;
+            border: 2px solid #666;
+        }
+        .light.active {
+            background-color: #ff0000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+        button {
+            padding: 14px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #e10600;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:active {
+            background-color: #b30400;
+            transform: scale(0.96);
+        }
+        #result {
+            font-size: 22px;
+            min-height: 30px;
+            color: #facc15;
+        }
+    </style>
+</head>
+<body>
+    <h1>I wrote some code, and AI helped me.♡⁠(⁠Ӧ⁠ｖ⁠Ӧ⁠｡⁠)(oh AI wrote some code and I helped AI(⁠•⁠‿⁠•⁠)</h1>
+    <div id="game-box">
+        <h2>F1 Reaction Time Test</h2>
+        <p>Start By Click The Button,<b>Tap The Sreen</b> til All The Lights Out！</p>
+        
+        <div class="lights">
+            <div class="light" id="l1"></div>
+            <div class="light" id="l2"></div>
+            <div class="light" id="l3"></div>
+            <div class="light" id="l4"></div>
+            <div class="light" id="l5"></div>
+        </div>
+
+        <h3 id="result">Ready...</h3>
+        <button id="start-btn" onclick="startGame()">Start!</button>
+    </div>
+
+    <script>
+        let timer;
+        let startTime;
+        let timeoutId;
+        let gameState = 'waiting'; // waiting, lighting, running
+
+        function startGame() {
+            const lights = document.querySelectorAll('.light');
+            lights.forEach(l => l.classList.remove('active'));
+            document.getElementById('result').innerText = '...';
+            document.getElementById('start-btn').style.display = 'none';
+            
+            let currentLight = 0;
+            gameState = 'lighting';
+
+            // 每隔 1 秒亮一颗红灯
+            timer = setInterval(() => {
+                if (currentLight < 5) {
+                    lights[currentLight].classList.add('active');
+                    currentLight++;
+                } else {
+                    clearInterval(timer);
+                    // 随机 1 到 3 秒后灯全灭
+                    const randomTime = Math.random() * 2000 + 1000;
+                    timeoutId = setTimeout(() => {
+                        lights.forEach(l => l.classList.remove('active'));
+                        gameState = 'running';
+                        startTime = new Date().getTime();
+                        document.getElementById('result').innerText = 'It is lights out and away we go!!!!!';
+                    }, randomTime);
+                }
+            }, 1000);
+        }
+
+        // 电脑键盘空格触发
+        window.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                handleAction();
+            }
+        });
+
+        // 平板/手机触屏及鼠标点击触发
+        window.addEventListener('pointerdown', function(e) {
+            if (e.target.id === 'start-btn') return;
+            handleAction();
+        });
+
+        function handleAction() {
+            const resultText = document.getElementById('result');
+            if (gameState === 'lighting') {
+                clearTimeout(timeoutId);
+                clearInterval(timer);
+                resultText.innerText = '⚠️Penalty of ten seconds for a suspected false start';
+                resetGame();
+            } else if (gameState === 'running') {
+                const endTime = new Date().getTime();
+                const reactionTime = endTime - startTime;
+                resultText.innerText = `⏱️ Reacion Time: ${reactionTime} ms！`;
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            gameState = 'waiting';
+            document.getElementById('start-btn').style.display = 'inline-block';
+            document.getElementById('start-btn').innerText = 'Try Again';
+        }
+    </script>
+
+</body>
+</html>
